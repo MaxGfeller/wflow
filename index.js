@@ -6,7 +6,8 @@ var wflow = function() {
 wflow.prototype.types = {
 	SEQUENCE: 'sequence',
 	CONDITION: 'condition',
-	PARTICIPANT: 'participant'
+	PARTICIPANT: 'participant',
+	CONCURRENT: 'concurrent'
 }
 
 wflow.prototype.registerParticipant = function(name, participant) {
@@ -47,6 +48,20 @@ wflow.prototype._processSequence = function(sequence, cb) {
 	processSequenceItem();
 }
 
+wflow.prototype._processConcurrent = function(concurrents, cb) {
+	var l = concurrents.length;
+	var i = 0;
+
+	var processConcurrentItem = function() {
+		i++;
+		if(i === l) return cb();
+	}
+
+	concurrents.forEach(function(concurrent) {
+		concurrent.call(this.payload, processConcurrentItem);
+	});
+}
+
 wflow.prototype._runParticipant = function(participant) {
 	var p = this.participants[participant.participant];
 
@@ -72,6 +87,8 @@ wflow.prototype._processWflowElement = function(el, cb) {
 
 	switch(type) {
 		case this.types.SEQUENCE: this._processSequence(el[type], cb);
+			break;
+		case this.types.CONCURRENT: this._processConcurrent(el[type], cb);
 			break;
 		case this.types.PARTICIPANT: this._runParticipant(el);
 			break;
