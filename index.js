@@ -1,5 +1,6 @@
 var wflow = function() {
 	this.participants = {};
+	this.payload = null;
 }
 
 wflow.prototype.types = {
@@ -20,8 +21,10 @@ wflow.prototype.setDefinition = function(definition) {
   this.definition = definition;
 }
 
-wflow.prototype.run = function() {
-	this._processSequence(this.definition, function() { console.log('finished!') });
+wflow.prototype.run = function(payload, cb) {
+	this.payload = payload || {};
+	cb = cb || function() {};
+	this._processSequence(this.definition, cb);
 }
 
 wflow.prototype._processSequence = function(sequence, cb) {
@@ -29,16 +32,15 @@ wflow.prototype._processSequence = function(sequence, cb) {
 	var i = 0;
 
 	var processSequenceItem = function() {
-		if(i === l) process.exit();
+		if(i === l) return cb();
 
 		var seqItem = sequence[i];
-
 		i++;
 
 		if(typeof seqItem === 'object') {
 			this._processWflowElement(seqItem, processSequenceItem);
 		} else if(typeof seqItem === 'function') {
-			seqItem.call(this, processSequenceItem);
+			seqItem.call(this.payload, processSequenceItem);
 		}
 	}.bind(this)
 
