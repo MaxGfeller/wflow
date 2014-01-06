@@ -77,8 +77,10 @@ Wflow.prototype._processConcurrent = function(concurrents, cb) {
 	}
 
 	concurrents.forEach(function(concurrent) {
-		this.emit('beforeCall', this.payload);
-		concurrent.call(this.payload, processConcurrentItem);
+		setTimeout(function() {
+			this.emit('beforeCall', this.payload);
+			concurrent.call(this.payload, processConcurrentItem);
+		}.bind(this), 0);
 	}.bind(this));
 }
 
