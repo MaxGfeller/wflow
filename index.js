@@ -30,8 +30,15 @@ Wflow.prototype.setDefinition = function(definition) {
 
 Wflow.prototype.run = function(payload, cb) {
 	this.payload = payload || {};
-	cb = cb || function() {};
-	this._processSequence(this.definition, cb);
+	if(!cb) {
+		if(typeof payload === 'function') {
+			cb = payload;
+		} else {
+			cb = function() {};
+		}
+	}
+
+	setTimeout(this._processSequence.bind(this, this.definition, cb));
 }
 
 Wflow.prototype._processSequence = function(sequence, cb) {
