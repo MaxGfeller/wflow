@@ -1,34 +1,40 @@
-var wflow = function() {
+var inherits = require('inherits');
+var EventEmitter = require('events').EventEmitter;
+
+var Wflow = function() {
 	this.participants = {};
 	this.payload = null;
+	this.adapter = null;
 }
 
-wflow.prototype.types = {
+inherits(Wflow, EventEmitter);
+
+Wflow.prototype.types = {
 	SEQUENCE: 'sequence',
 	CONDITION: 'condition',
 	PARTICIPANT: 'participant',
 	CONCURRENT: 'concurrent'
 }
 
-wflow.prototype.registerParticipant = function(name, participant) {
+Wflow.prototype.registerParticipant = function(name, participant) {
 	this.participants[name] = participant;
 }
 
-wflow.prototype.setAdapter = function(adapter) {
+Wflow.prototype.setAdapter = function(adapter) {
   this.adapter = adapter;
 }
 
-wflow.prototype.setDefinition = function(definition) {
+Wflow.prototype.setDefinition = function(definition) {
   this.definition = definition;
 }
 
-wflow.prototype.run = function(payload, cb) {
+Wflow.prototype.run = function(payload, cb) {
 	this.payload = payload || {};
 	cb = cb || function() {};
 	this._processSequence(this.definition, cb);
 }
 
-wflow.prototype._processSequence = function(sequence, cb) {
+Wflow.prototype._processSequence = function(sequence, cb) {
 	var l = sequence.length;
 	var i = 0;
 
@@ -41,6 +47,7 @@ wflow.prototype._processSequence = function(sequence, cb) {
 		if(typeof seqItem === 'object') {
 			this._processWflowElement(seqItem, processSequenceItem);
 		} else if(typeof seqItem === 'function') {
+			this.emit('beforeCall', this.payload);
 			seqItem.call(this.payload, processSequenceItem);
 		}
 	}.bind(this)
@@ -48,7 +55,7 @@ wflow.prototype._processSequence = function(sequence, cb) {
 	processSequenceItem();
 }
 
-wflow.prototype._processConcurrent = function(concurrents, cb) {
+Wflow.prototype._processConcurrent = function(concurrents, cb) {
 	var l = concurrents.length;
 	var i = 0;
 
@@ -58,11 +65,12 @@ wflow.prototype._processConcurrent = function(concurrents, cb) {
 	}
 
 	concurrents.forEach(function(concurrent) {
+		this.emit('beforeCall', this.payload);
 		concurrent.call(this.payload, processConcurrentItem);
-	});
+	}.bind(this));
 }
 
-wflow.prototype._runParticipant = function(participant) {
+Wflow.prototype._runParticipant = function(participant) {
 	var p = this.participants[participant.participant];
 
 	if(!p) return console.error('Participant not found: ' + participant.participant);
@@ -74,15 +82,15 @@ wflow.prototype._runParticipant = function(participant) {
 	func.call(p);
 }
 
-wflow.prototype.pause = function() {
+Wflow.prototype.pause = function() {
 
 }
 
-wflow.prototype.resume = function() {
+Wflow.prototype.resume = function() {
 
 }
 
-wflow.prototype._processWflowElement = function(el, cb) {
+Wflow.prototype._processWflowElement = function(el, cb) {
 	var type = Object.keys(el)[0];
 
 	switch(type) {
@@ -96,4 +104,4 @@ wflow.prototype._processWflowElement = function(el, cb) {
 	}
 }
 
-module.exports = new wflow();
+module.exports = new Wflow();
