@@ -45,7 +45,12 @@ Wflow.prototype._processSequence = function(sequence, cb) {
 	var l = sequence.length;
 	var i = 0;
 
-	var processSequenceItem = function() {
+	var processSequenceItem = function(err) {
+		if(err) {
+			this.emit('error', err);
+			return this.pause();
+		}
+
 		if(i === l) return cb();
 
 		var seqItem = sequence[i];
