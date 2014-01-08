@@ -23,7 +23,7 @@ var workflowDefinition = [
 
 wflow.setDefinition(workflowDefinition);
 
-wflow.run(null, function() {
+wflow.run(function() {
 	console.log('Finished!')
 });
 
