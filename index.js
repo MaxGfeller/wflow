@@ -1,5 +1,6 @@
 var inherits = require('inherits');
 var EventEmitter = require('events').EventEmitter;
+var randomId = require('random-id');
 
 var Wflow = function() {
 	this.participants = {};
@@ -33,11 +34,13 @@ Wflow.prototype.run = function(payload, cb) {
 	if(!cb) {
 		if(typeof payload === 'function') {
 			cb = payload;
+			this.payload = {};
 		} else {
 			cb = function() {};
 		}
 	}
 
+	if(this.adapter) this.adapter.initializeWorkflow(randomId(20,"aaaaa0"), this.definition, this.payload);
 	setTimeout(this._processSequence.bind(this, this.definition, cb));
 }
 
