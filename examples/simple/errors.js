@@ -1,4 +1,5 @@
 var wflow = require('../../index.js');
+var FsAdapter = require('wflow-adapter-fs');
 
 var workflowDefinition = [
 	{ 'sequence': [
@@ -21,6 +22,9 @@ var workflowDefinition = [
 	] }
 ];
 
+wflow.setAdapter(new FsAdapter({
+	dir: 'workflow-data'
+}));
 wflow.setDefinition(workflowDefinition);
 
 wflow.run(function() {
