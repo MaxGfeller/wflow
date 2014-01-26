@@ -9,6 +9,7 @@
   "author": "Max Gfeller <max.gfeller@gmail.com>",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "inherits": "~2.0.1"
+    "inherits": "~2.0.1",
+    "random-id": "0.0.2"
   }
 }
